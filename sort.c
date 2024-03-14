@@ -3,12 +3,15 @@
 #include <stdio.h>
 #include <string.h>
 
+//Function Prototypes
+void merge(int pData[], int left, int middle, int right);
+
 int extraMemoryAllocated;
 
 void *Alloc(size_t sz)
 {
 	extraMemoryAllocated += sz;
-	size_t* ret = malloc(sizeof(size_t) + sz);
+	size_t* ret = malloc(sizeof(size_t) + sz); //pretty sure this should be * sz ASK PROFESSOR
 	*ret = sz;
 	printf("Extra memory allocated, size: %ld\n", sz);
 	return &ret[1];
@@ -19,7 +22,7 @@ void DeAlloc(void* ptr)
 	size_t* pSz = (size_t*)ptr - 1;
 	extraMemoryAllocated -= *pSz;
 	printf("Extra memory deallocated, size: %ld\n", *pSz);
-	free((size_t*)ptr - 1);
+	free((size_t*)ptr - 1); //why is the -1 here? ASK PROFESSOR
 }
 
 size_t Size(void* ptr)
@@ -31,6 +34,69 @@ size_t Size(void* ptr)
 // extraMemoryAllocated counts bytes of extra memory allocated
 void mergeSort(int pData[], int l, int r)
 {
+	if (l < r) {
+		int middle = (l + r)/2;
+
+		mergeSort(pData, l, middle);
+		mergeSort(pData, middle + 1, r);
+
+		merge(pData, l, middle, r);
+	}
+}
+
+//NEEDED TO CREATE A MERGE FUNCTION
+void merge(int pData[], int left, int middle, int right) {
+	//variables needed for indexes and size
+	int i, j, k;
+	int n1 = middle - left + 1;
+	int n2 = right - middle;
+
+	//allocate memory for subarrays
+	int* pLeft = Alloc(sizeof(int) * n1);
+	int* pRight = Alloc(sizeof(int) * n2);
+
+	//copy data into subarrays
+	for (i = 0; i < n1; ++i) {
+		pLeft[i] = pData[left + i];
+	}
+	for (j = 0; j < n2; ++j) {
+		pRight[j] = pData[middle + 1 + j];
+	}
+
+	//merge temp arrays back into original array
+	//initial indexes below
+	i = 0; //left subarray
+	j = 0; //right subarray
+	k = left; //merged subarray
+	while (i < n1 && j < n2) {
+		if (pLeft[i] <= pRight[j]) {
+			pData[k] = pLeft[i];
+			++i;
+		}
+		else {
+			pData[k] = pRight[j];
+			++j;
+		}
+		++k;
+	}
+
+	//copy any remaining elements of left subarray
+	while (i < n1) {
+		pData[k] = pLeft[i];
+		++i;
+		++k;
+	}
+
+	//copy any remaining elements of right subarray
+	while (j < n2) {
+		pData[k] = pRight[j];
+		++j;
+		++k;
+	}
+
+	//free subarray memory
+	DeAlloc(pLeft);
+	DeAlloc(pRight);
 }
 
 // parses input file to an integer array
