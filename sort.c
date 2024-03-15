@@ -11,7 +11,7 @@ int extraMemoryAllocated;
 void *Alloc(size_t sz)
 {
 	extraMemoryAllocated += sz;
-	size_t* ret = malloc(sizeof(size_t) + sz); //pretty sure this should be * sz ASK PROFESSOR
+	size_t* ret = malloc(sizeof(size_t) + sz);
 	*ret = sz;
 	printf("Extra memory allocated, size: %ld\n", sz);
 	return &ret[1];
@@ -22,7 +22,7 @@ void DeAlloc(void* ptr)
 	size_t* pSz = (size_t*)ptr - 1;
 	extraMemoryAllocated -= *pSz;
 	printf("Extra memory deallocated, size: %ld\n", *pSz);
-	free((size_t*)ptr - 1); //why is the -1 here? ASK PROFESSOR
+	free((size_t*)ptr - 1);
 }
 
 size_t Size(void* ptr)
